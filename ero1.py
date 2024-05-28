@@ -3,11 +3,13 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
 from algorithms import parkourGraphDrone, printInfos
+import platform
 
 # Set the backend explicitly to TkAgg for better compatibility
-matplotlib.use('TkAgg')
-matplotlib.interactive(True)
-print(matplotlib.is_interactive())
+if platform.system() != "Darwin":
+    matplotlib.use('TkAgg')
+
+print(platform.system())
 
 # List of sectors to plot
 sectors = [

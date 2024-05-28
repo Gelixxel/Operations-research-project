@@ -8,8 +8,7 @@ import platform
 # Set the backend explicitly to TkAgg for better compatibility
 if platform.system() != "Darwin":
     matplotlib.use('TkAgg')
-
-print(platform.system())
+# print(platform.system())
 
 # List of sectors to plot
 sectors = [

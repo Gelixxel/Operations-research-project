@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
-from algorithms import parkourGraphDrone
+from algorithms import parkourGraphDrone, printInfos
 
 # List of sectors to plot
 sectors = [
@@ -18,7 +18,7 @@ combined_graph = nx.MultiDiGraph()
 # Download and combine the street network graphs for the specified sectors
 for sector in sectors:
     # print(f"Downloading data for {sector}...")
-    G = ox.graph_from_place(sector, network_type='drive_service')
+    G = ox.graph_from_place(sector, network_type='drive')
     combined_graph = nx.compose(combined_graph, G)
 
 # Convert the graph to a directed graph
@@ -41,7 +41,8 @@ combined_graph.remove_nodes_from(isolated_nodes)
 total_distance_km = parkourGraphDrone(combined_graph)
 print(f"Total distance of the graph: {total_distance_km:.2f} km")
 
+printInfos(combined_graph)
+
 fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_color='w', edge_linewidth=0.5)
 # plt.savefig("montreal_combined_graph.png")
-
-plt.show()
+fig.show()

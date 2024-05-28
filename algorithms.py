@@ -14,3 +14,16 @@ def parkourGraphDrone(G):
             total_distance_km += data['length'] / 1000.0  # Convert meters to kilometers
     
     return total_distance_km
+
+def printInfos(G):
+    nodes_data = G.nodes(data=True)
+    edges_data = G.edges(data=True)
+    # Display the first 5 nodes and their attributes
+    print("First 5 nodes:")
+    for node, data in list(nodes_data)[:5]:
+        print(node, data)
+
+    # Display the first 5 edges and their attributes
+    print("\nFirst 5 edges:")
+    for u, v, data in list(edges_data)[:5]:
+        print(u, v, data)

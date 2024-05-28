@@ -1,7 +1,13 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
 from algorithms import parkourGraphDrone, printInfos
+
+# Set the backend explicitly to TkAgg for better compatibility
+matplotlib.use('TkAgg')
+matplotlib.interactive(True)
+print(matplotlib.is_interactive())
 
 # List of sectors to plot
 sectors = [
@@ -24,8 +30,7 @@ for sector in sectors:
 # Convert the graph to a directed graph
 combined_graph = combined_graph.to_directed()
 
-# filtered graph by reads
-
+# Filter graph by road types
 road_types = ['primary', 'secondary', 'tertiary']
 edges_to_remove = [(u, v, k) for u, v, k, data in combined_graph.edges(keys=True, data=True)
                    if data['highway'] not in road_types]
@@ -45,4 +50,4 @@ printInfos(combined_graph)
 
 fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_color='w', edge_linewidth=0.5)
 # plt.savefig("montreal_combined_graph.png")
-fig.show()
+plt.show(block=True)

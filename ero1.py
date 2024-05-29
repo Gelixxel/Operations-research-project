@@ -2,7 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
-from algorithms import parkourGraphDrone, printInfos
+from package.algorithms import parkourGraphDrone, printInfos
 import platform
 
 # Set the backend explicitly to TkAgg for better compatibility

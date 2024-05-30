@@ -3,6 +3,7 @@ import networkx as nx
 import osmnx as ox
 from package.cout import cost_drone
 from geopy.distance import geodesic
+import time
 # import cProfile
 # import pstats
 
@@ -46,6 +47,7 @@ def calculate_total_distance(G, eulerian_circuit):
     return total_distance
 
 def Drone_Travel(G):
+    start_time = time.time()
     # Convert the directed graph to an undirected graph
     G = G.to_undirected()
 
@@ -73,6 +75,13 @@ def Drone_Travel(G):
 
     # Extract the node IDs from the eulerian_circuit
     node_ids = [node for node, _ in eulerian_circuit]
+
+    # Compute the execution_time and prints it
+    end_time = time.time()
+    execution_time = end_time - start_time
+    hours, remain = divmod(execution_time, 3600)
+    minutes, seconds = divmod(remain, 60)
+    print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):02}secs")
 
     # Plot the graph with the trajectories
     fig, ax = ox.plot_graph(G, show=False, close=False)

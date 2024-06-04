@@ -12,6 +12,8 @@ if platform.system() != "Darwin":
 
 # List of sectors to plot
 sectors = [
+    # "Montreal, Quebec, Canada"
+    ######################################
     "Outremont, Montreal, Quebec, Canada",
     "Verdun, Montreal, Quebec, Canada",
     "Anjou, Montreal, Quebec, Canada",
@@ -28,26 +30,26 @@ for sector in sectors:
     G = ox.graph_from_place(sector, network_type='drive', simplify=True, retain_all=True)
     combined_graph = nx.compose(combined_graph, G)
 
-# Convert the graph to a directed graph
-combined_graph = combined_graph.to_directed()
+# # Convert the graph to a directed graph
+# combined_graph = combined_graph.to_directed()
 
-# Filter graph by road types
-road_types = ['primary', 'secondary', 'tertiary']
-edges_to_remove = [(u, v, k) for u, v, k, data in combined_graph.edges(keys=True, data=True)
-                   if data['highway'] not in road_types]
+# # Filter graph by road types
+# road_types = ['primary', 'secondary', 'tertiary']
+# edges_to_remove = [(u, v, k) for u, v, k, data in combined_graph.edges(keys=True, data=True)
+#                    if data['highway'] not in road_types]
 
-# Remove edges that are not of the specified road types
-combined_graph.remove_edges_from(edges_to_remove)
+# # Remove edges that are not of the specified road types
+# combined_graph.remove_edges_from(edges_to_remove)
 
-# Remove isolated nodes
-isolated_nodes = list(nx.isolates(combined_graph))
-combined_graph.remove_nodes_from(isolated_nodes)
+# # Remove isolated nodes
+# isolated_nodes = list(nx.isolates(combined_graph))
+# combined_graph.remove_nodes_from(isolated_nodes)
 
 # Calculate the total distance of the graph
 total_distance_km = parkourGraphDrone(combined_graph)
 print(f"Total distance of the graph: {total_distance_km:.2f} km")
 
-printInfos(combined_graph)
+# printInfos(combined_graph)
 
 fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_color='w', edge_linewidth=0.5)
 # plt.savefig("montreal_combined_graph.png")

@@ -39,6 +39,8 @@ combined_graph = nx.MultiDiGraph()
 
 centralized_nodes = []
 
+G2 = ox.graph_from_place("Montreal, Quebec, Canada", network_type="drive", simplify=True, retain_all=True)
+
 # Download and combine the street network graphs for the specified sectors and add the closest node from centrality to the centralized_nodes list
 for sector in sectors:
     G = ox.graph_from_place(sector, network_type="drive", simplify=True, retain_all=True)
@@ -46,6 +48,15 @@ for sector in sectors:
     centrality = nx.closeness_centrality(G)
     central_node = max(centrality, key=centrality.get)
     centralized_nodes.append(central_node)
+
+# Add the new nodes to the graph 
+combined_graph.add_nodes_from(G2.nodes(data=True))
+combined_graph.add_edges_from(G2.edges(data=True))
+
+# Add centralized nodes to the combined graph
+for node in centralized_nodes:
+    if node not in combined_graph:
+        combined_graph.add_node(node, **G2.nodes[node])
 
 # Dictionary to store shortest paths
 shortest_paths = {}

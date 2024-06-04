@@ -25,7 +25,7 @@ combined_graph = nx.MultiDiGraph()
 # Download and combine the street network graphs for the specified sectors
 for sector in sectors:
     # print(f"Downloading data for {sector}...")
-    G = ox.graph_from_place(sector, network_type='drive')
+    G = ox.graph_from_place(sector, network_type='drive', simplify=True, retain_all=True)
     combined_graph = nx.compose(combined_graph, G)
 
 # Convert the graph to a directed graph

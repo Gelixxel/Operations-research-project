@@ -10,7 +10,7 @@ import time
 # loading montreal sector
 sect = "Montreal, Quebec, Canada"
 
-G = ox.graph_from_place(sect, network_type="drive")
+G = ox.graph_from_place(sect, network_type="drive", simplify=True, retain_all=True)
 
 def add_shortest_edges_to_make_eulerian(G, odd_nodes):
     while odd_nodes:

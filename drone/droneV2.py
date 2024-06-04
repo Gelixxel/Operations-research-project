@@ -11,7 +11,7 @@ from geopy.distance import geodesic
 if platform.system() != "Darwin":
     matplotlib.use('TkAgg')
 
-# loading montreal sector
+# Define the sectors
 sectors = [
     "Ahuntsic-Cartierville, Montreal, Quebec, Canada",
     "Anjou, Montreal, Quebec, Canada",
@@ -34,80 +34,37 @@ sectors = [
     "Villeray–Saint-Michel–Parc-Extension, Montreal, Quebec, Canada"
 ]
 
-# Initialize an empty graph
-combined_graph = nx.MultiDiGraph()
+# Download the entire Montreal street network
+print("Downloading the street network for Montreal...")
+montreal_graph = ox.graph_from_place("Montreal, Quebec, Canada", network_type='drive')
+print("Downloaded the street network for Montreal.")
 
-centralized_nodes = []
-
-G2 = ox.graph_from_place("Montreal, Quebec, Canada", network_type="drive", simplify=True, retain_all=True)
-
-# Download and combine the street network graphs for the specified sectors and add the closest node from centrality to the centralized_nodes list
+# Calculate the centrality for each node and find the most central node for each sector
+central_nodes = []
 for sector in sectors:
-    G = ox.graph_from_place(sector, network_type="drive", simplify=True, retain_all=True)
-    combined_graph = nx.compose(combined_graph, G)
-    centrality = nx.closeness_centrality(G)
-    central_node = max(centrality, key=centrality.get)
-    centralized_nodes.append(central_node)
+    sector_graph = ox.graph_from_place(sector, network_type='drive')
+    centrality = nx.betweenness_centrality(sector_graph)
+    most_central_node = max(centrality, key=centrality.get)
+    central_nodes.append(most_central_node)
+    print(f"Central node for sector {sector} is {most_central_node}")
 
-# Add the new nodes to the graph 
-combined_graph.add_nodes_from(G2.nodes(data=True))
-combined_graph.add_edges_from(G2.edges(data=True))
+# Compute the shortest path for each pair of centralized nodes and connect the last node to the first
+all_paths = []
+for i in range(len(central_nodes)):
+    source = central_nodes[i]
+    target = central_nodes[(i + 1) % len(central_nodes)]  # Connect last node back to the first node
+    if nx.has_path(montreal_graph, source, target):  # Check if path exists in the Montreal graph
+        shortest_path = nx.shortest_path(montreal_graph, source=source, target=target, weight='length')
+        all_paths.append(shortest_path)
+        print(f"Shortest path between {source} and {target} is {shortest_path}")
+    else:
+        print(f"No path between {source} and {target}.")
 
-# Add centralized nodes to the combined graph
-for node in centralized_nodes:
-    if node not in combined_graph:
-        combined_graph.add_node(node, **G2.nodes[node])
+# Plot the Montreal map with all shortest paths
+print("Plotting the Montreal map with the shortest path between each pair of nodes in red...")
+fig, ax = ox.plot_graph(montreal_graph, node_size=10, edge_color='gray', show=False, close=False)
 
-# Dictionary to store shortest paths
-shortest_paths = {}
+# Plot all paths in red
+ox.plot_graph_routes(montreal_graph, routes=all_paths, route_linewidth=2, route_color='red', ax=ax, orig_dest_node_size=0)
 
-# Function to find alternative nodes with paths
-def find_alternative_nodes(G, node1, node2):
-    neighbors1 = list(G.neighbors(node1))
-    neighbors2 = list(G.neighbors(node2))
-    
-    for alt_node1 in neighbors1:
-        for alt_node2 in neighbors2:
-            try:
-                nx.dijkstra_path(G, alt_node1, alt_node2)
-                return alt_node1, alt_node2
-            except nx.NetworkXNoPath:
-                continue
-    return None, None
-
-# Compute the shortest path for each pair of centralized nodes and add it to the shortest_paths dictionary
-for i, node1 in enumerate(centralized_nodes):
-    for node2 in centralized_nodes[i+1:]:
-        try:
-            path = nx.dijkstra_path(combined_graph, node1, node2)
-            shortest_paths[(node1, node2)] = path
-        except nx.NetworkXNoPath:
-            print(f"No path between {node1} and {node2}, finding alternative nodes.")
-            alt_node1, alt_node2 = find_alternative_nodes(combined_graph, node1, node2)
-            if alt_node1 and alt_node2:
-                try:
-                    path = nx.dijkstra_path(combined_graph, alt_node1, alt_node2)
-                    shortest_paths[(alt_node1, alt_node2)] = path
-                except nx.NetworkXNoPath:
-                    print(f"No alternative path found between {alt_node1} and {alt_node2}, skipping.")
-            else:
-                print(f"No alternative nodes found for {node1} or {node2}, skipping.")
-
-# Function to calculate the total distance of a path
-def calculate_total_distance(G, path):
-    total_distance = 0
-    for i in range(len(path) - 1):
-        U = G.nodes[path[i]]['y'], G.nodes[path[i]]['x']
-        V = G.nodes[path[i+1]]['y'], G.nodes[path[i+1]]['x']
-        total_distance += geodesic(U, V).kilometers
-    return total_distance
-
-# Calculate the total distance for each shortest path and store it in a list
-distances = [calculate_total_distance(combined_graph, path) for path in shortest_paths.values()]
-
-# Plot the montreal map with the shortest path between nodes
-fig, ax = ox.plot_graph(combined_graph, show=False, close=False)
-for path in shortest_paths.values():
-    if all(node in combined_graph.nodes for node in path):
-        ox.plot_graph_route(combined_graph, path, route_linewidth=2, route_color='r', ax=ax)
 plt.show()

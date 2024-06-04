@@ -12,6 +12,12 @@ sect = "Montreal, Quebec, Canada"
 
 G = ox.graph_from_place(sect, network_type="drive", simplify=True, retain_all=True)
 
+def is_eulerian(G):
+    return all(degree % 2 == 0 for _, degree in G.degree())
+
+def find_eulerian_circuit(G, start_node):
+    return list(nx.eulerian_circuit(G, source=start_node))
+
 def add_shortest_edges_to_make_eulerian(G, odd_nodes):
     while odd_nodes:
         u = odd_nodes.pop(0)
@@ -48,7 +54,6 @@ def calculate_total_distance(G, eulerian_circuit):
 
 def Drone_Travel(G):
     start_time = time.time()
-    # Convert the directed graph to an undirected graph
     G = G.to_undirected()
 
     # Identify all odd degree nodes
@@ -57,13 +62,16 @@ def Drone_Travel(G):
     # Pair odd degree nodes by adding the shortest links
     add_shortest_edges_to_make_eulerian(G, odd_nodes)
 
+    # Check if the graph is Eulerian
+    if not is_eulerian(G):
+        return None
+
     # Find the node with the highest closeness centrality
     centrality = nx.closeness_centrality(G)
     start_node = max(centrality, key=centrality.get)
 
-
     # Find the Eulerian circuit
-    eulerian_circuit = list(nx.eulerian_circuit(G, source=start_node))
+    eulerian_circuit = find_eulerian_circuit(G, start_node)
 
     # Calculate the total distance traveled
     total_distance = calculate_total_distance(G, eulerian_circuit)

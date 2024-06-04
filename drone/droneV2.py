@@ -1,163 +1,102 @@
+import platform
 import time
+from statistics import median
 
+import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
 from geopy.distance import geodesic
-from networkx.algorithms import bipartite
 
-from package.cout import cost_drone
-
-# import cProfile
-# import pstats
+if platform.system() != "Darwin":
+    matplotlib.use('TkAgg')
 
 # loading montreal sector
-sect = "Montreal, Quebec, Canada"
+sectors = [
+    "Ahuntsic-Cartierville, Montreal, Quebec, Canada",
+    "Anjou, Montreal, Quebec, Canada",
+    "Côte-des-Neiges–Notre-Dame-de-Grâce, Montreal, Quebec, Canada",
+    "LaSalle, Montreal, Quebec, Canada",
+    "Lachine, Montreal, Quebec, Canada",
+    "Le Plateau-Mont-Royal, Montreal, Quebec, Canada",
+    "Le Sud-Ouest, Montreal, Quebec, Canada",
+    "L’Île-Bizard–Sainte-Geneviève, Montreal, Quebec, Canada",
+    "Mercier–Hochelaga-Maisonneuve, Montreal, Quebec, Canada",
+    "Montréal-Nord, Montreal, Quebec, Canada",
+    "Outremont, Montreal, Quebec, Canada",
+    "Pierrefonds-Roxboro, Montreal, Quebec, Canada",
+    "Rivière-des-Prairies–Pointe-aux-Trembles, Montreal, Quebec, Canada",
+    "Rosemont–La Petite-Patrie, Montreal, Quebec, Canada",
+    "Saint-Laurent, Montreal, Quebec, Canada",
+    "Saint-Léonard, Montreal, Quebec, Canada",
+    "Verdun, Montreal, Quebec, Canada",
+    "Ville-Marie, Montreal, Quebec, Canada",
+    "Villeray–Saint-Michel–Parc-Extension, Montreal, Quebec, Canada"
+]
 
-G = ox.graph_from_place(sect, network_type="drive", simplify=True)
+# Initialize an empty graph
+combined_graph = nx.MultiDiGraph()
 
-def is_eulerian(G):
-    return all(degree % 2 == 0 for _, degree in G.degree())
+centralized_nodes = []
 
-def find_eulerian_circuit(G, start_node):
-    return list(nx.eulerian_circuit(G, source=start_node))
+# Download and combine the street network graphs for the specified sectors and add the closest node from centrality to the centralized_nodes list
+for sector in sectors:
+    G = ox.graph_from_place(sector, network_type="drive", simplify=True, retain_all=True)
+    combined_graph = nx.compose(combined_graph, G)
+    centrality = nx.closeness_centrality(G)
+    central_node = max(centrality, key=centrality.get)
+    centralized_nodes.append(central_node)
 
-def find_shortest_eulerian_circuit(G, start_node):
-    """ Find an Eulerian circuit in graph G starting at node start_node,
-        attempting to choose shorter edges first when possible.
-    """
-    # Ensure the graph is Eulerian
-    if not is_eulerian(G):
-        raise ValueError("The graph is not Eulerian")
+# Dictionary to store shortest paths
+shortest_paths = {}
 
-    # The circuit
-    circuit = []
+# Function to find alternative nodes with paths
+def find_alternative_nodes(G, node1, node2):
+    neighbors1 = list(G.neighbors(node1))
+    neighbors2 = list(G.neighbors(node2))
     
-    # Create a deep copy of the graph so we can modify it
-    G = nx.MultiGraph(G)
-    
-    # Current vertex
-    current_vertex = start_node
-    
-    while True:
-        # Get edges from the current vertex
-        edges = list(G.edges(current_vertex, data='length'))
-        
-        if not edges:
-            break
-        
-        # Sort edges by weight (length)
-        edges.sort(key=lambda x: x[2])
-        
-        # Find the edge that is not a bridge, or the shortest if all are bridges
-        for u, v, length in edges:
-            G.remove_edge(u, v)
-            bridge = not nx.is_eulerian(G)
-            if not bridge:
-                current_vertex = v
-                circuit.append((u, v))
-                break
-            # If removing the edge makes the graph non-Eulerian, add it back
-            G.add_edge(u, v, length=length)
-        else:
-            # If all edges are bridges, choose the shortest
-            u, v, length = edges[0]
-            G.remove_edge(u, v)
-            current_vertex = v
-            circuit.append((u, v))
+    for alt_node1 in neighbors1:
+        for alt_node2 in neighbors2:
+            try:
+                nx.dijkstra_path(G, alt_node1, alt_node2)
+                return alt_node1, alt_node2
+            except nx.NetworkXNoPath:
+                continue
+    return None, None
 
-    return circuit
+# Compute the shortest path for each pair of centralized nodes and add it to the shortest_paths dictionary
+for i, node1 in enumerate(centralized_nodes):
+    for node2 in centralized_nodes[i+1:]:
+        try:
+            path = nx.dijkstra_path(combined_graph, node1, node2)
+            shortest_paths[(node1, node2)] = path
+        except nx.NetworkXNoPath:
+            print(f"No path between {node1} and {node2}, finding alternative nodes.")
+            alt_node1, alt_node2 = find_alternative_nodes(combined_graph, node1, node2)
+            if alt_node1 and alt_node2:
+                try:
+                    path = nx.dijkstra_path(combined_graph, alt_node1, alt_node2)
+                    shortest_paths[(alt_node1, alt_node2)] = path
+                except nx.NetworkXNoPath:
+                    print(f"No alternative path found between {alt_node1} and {alt_node2}, skipping.")
+            else:
+                print(f"No alternative nodes found for {node1} or {node2}, skipping.")
 
-def add_optimal_edges_to_make_eulerian(G, odd_nodes):
-    # Create a complete graph of odd-degree nodes
-    odd_graph = nx.Graph()
-    for i in range(len(odd_nodes)):
-        for j in range(i + 1, len(odd_nodes)):
-            u, v = odd_nodes[i], odd_nodes[j]
-            distance = geodesic((G.nodes[u]['y'], G.nodes[u]['x']), (G.nodes[v]['y'], G.nodes[v]['x'])).kilometers
-            odd_graph.add_edge(u, v, weight=distance)
-
-    # Find the minimum weight perfect matching
-    min_weight_pairs = nx.algorithms.matching.min_weight_matching(odd_graph, maxcardinality=True, weight='weight')
-
-    # Add the edges to the graph
-    for u, v in min_weight_pairs:
-        G.add_edge(u, v, length=odd_graph[u][v]['weight'])
-
-def add_shortest_edges_to_make_eulerian(G, odd_nodes):
-    while odd_nodes:
-        u = odd_nodes.pop(0)
-        min_distance = float('inf')
-        closest_node = None
-
-        for v in odd_nodes:
-            U = G.nodes[u]['y'], G.nodes[u]['x']
-            V = G.nodes[v]['y'], G.nodes[v]['x']
-            dist = geodesic(U, V).kilometers
-            if dist < min_distance:
-                min_distance = dist
-                closest_node = v
-
-        if closest_node is not None:
-            G.add_edge(u, closest_node, length=min_distance)
-            odd_nodes.remove(closest_node)
-
-def calculate_total_distance(G, eulerian_circuit):
+# Function to calculate the total distance of a path
+def calculate_total_distance(G, path):
     total_distance = 0
-
-    for U, V in eulerian_circuit:
-        # Get (lat, lon) of U and V
-        U_coords = G.nodes[U]['y'], G.nodes[U]['x']
-        V_coords = G.nodes[V]['y'], G.nodes[V]['x']
-
-        # Get Geodesic distance between each point
-        edge_distance = geodesic(U_coords, V_coords).kilometers
-
-        # Add the distance
-        total_distance += edge_distance
-
+    for i in range(len(path) - 1):
+        U = G.nodes[path[i]]['y'], G.nodes[path[i]]['x']
+        V = G.nodes[path[i+1]]['y'], G.nodes[path[i+1]]['x']
+        total_distance += geodesic(U, V).kilometers
     return total_distance
 
-def Drone_Travel(G):
-    start_time = time.time()
-    G = G.to_undirected()
+# Calculate the total distance for each shortest path and store it in a list
+distances = [calculate_total_distance(combined_graph, path) for path in shortest_paths.values()]
 
-    # Identify all odd degree nodes
-    odd_nodes = [node for node, degree in G.degree() if degree % 2 != 0]
-
-    # Pair odd degree nodes optimally
-    add_optimal_edges_to_make_eulerian(G, odd_nodes)
-
-    # Check if the graph is Eulerian
-    if not is_eulerian(G):
-        return None
-
-    # Find the node with the highest closeness centrality as the start node
-    centrality = nx.closeness_centrality(G)
-    start_node = max(centrality, key=centrality.get)
-
-    # Find the Eulerian circuit using a heuristic approach
-    eulerian_circuit = find_shortest_eulerian_circuit(G, start_node)
-
-    # Calculate the total distance traveled
-    total_distance = calculate_total_distance(G, eulerian_circuit)
-    print("Total Distance Traveled (kilometers):", total_distance)
-
-    # Calculate the cost of the operation
-    prix = cost_drone(total_distance)
-    print("Price of this operation (in euros):", prix)
-
-    # Compute the execution time
-    end_time = time.time()
-    execution_time = end_time - start_time
-    hours, remain = divmod(execution_time, 3600)
-    minutes, seconds = divmod(remain, 60)
-    print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):02}secs")
-
-    return prix, total_distance, execution_time
-
-Drone_Travel(G)
-
-# cProfile.run('Drone_Travel(G)', 'profile_stats')
-# p = pstats.Stats('profile_stats')
-# p.sort_stats('cumulative').print_stats(10)
+# Plot the montreal map with the shortest path between nodes
+fig, ax = ox.plot_graph(combined_graph, show=False, close=False)
+for path in shortest_paths.values():
+    if all(node in combined_graph.nodes for node in path):
+        ox.plot_graph_route(combined_graph, path, route_linewidth=2, route_color='r', ax=ax)
+plt.show()

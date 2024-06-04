@@ -10,7 +10,8 @@ setup(
         'osmnx',
         'matplotlib',
         'geopy',
-        'tk'
+        'tk',
+        'geopandas',
         ],
 )
 

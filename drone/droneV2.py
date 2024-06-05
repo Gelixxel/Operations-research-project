@@ -10,25 +10,6 @@ from geopy.distance import geodesic
 
 from package.cout import cost_drone
 
-# fonction de calcul de la distance totale a changer
-def calculate_total_distance(G, eulerian_circuit):
-    total_distance = 0
-
-    for U, V in eulerian_circuit:
-        # Get (lat, lon) of U and V
-        U_coords = G.nodes[U]['y'], G.nodes[U]['x']
-        V_coords = G.nodes[V]['y'], G.nodes[V]['x']
-
-        # Get Geodesic distance between each point
-        edge_distance = geodesic(U_coords, V_coords).kilometers
-
-        # Add the distance
-        total_distance += edge_distance
-
-    return total_distance
-
-start_time = time.time()
-
 if platform.system() != "Darwin":
     matplotlib.use('TkAgg')
 
@@ -55,6 +36,19 @@ sectors = [
     "Villeray–Saint-Michel–Parc-Extension, Montreal, Quebec, Canada"
 ]
 
+# Function to calculate the total distance of all paths
+def calculate_total_distance(graph, paths):
+    total_distance = 0
+    for path in paths:
+        for i in range(len(path) - 1):
+            edge_data = graph.get_edge_data(path[i], path[i + 1])
+            # The distance might be stored under different keys; checking common possibilities
+            distance = edge_data[0].get('length', 0)  # 0th element assuming graph is multi-edge
+            total_distance += distance
+    return total_distance / 1000  # Convert meters to kilometers
+
+start_time = time.time()
+
 # Download the entire Montreal street network
 print("Downloading the street network for Montreal...")
 montreal_graph = ox.graph_from_place("Montreal, Quebec, Canada", network_type='drive')
@@ -67,7 +61,7 @@ for sector in sectors:
     centrality = nx.betweenness_centrality(sector_graph)
     most_central_node = max(centrality, key=centrality.get)
     central_nodes.append(most_central_node)
-    print(f"Central node for sector {sector} is {most_central_node}")
+    # print(f"Central node for sector {sector} is {most_central_node}")
 
 # Compute the shortest path for each pair of centralized nodes and connect the last node to the first
 all_paths = []
@@ -77,17 +71,17 @@ for i in range(len(central_nodes)):
     if nx.has_path(montreal_graph, source, target):  # Check if path exists in the Montreal graph
         shortest_path = nx.shortest_path(montreal_graph, source=source, target=target, weight='length')
         all_paths.append(shortest_path)
-        print(f"Shortest path between {source} and {target} is {shortest_path}")
+        # print(f"Shortest path between {source} and {target} is {shortest_path}")
     else:
         print(f"No path between {source} and {target}.")
 
-# # Calculate the total distance traveled
-# total_distance = calculate_total_distance(montreal_graph, all_paths)
-# print("Total Distance Traveled (kilometers):", total_distance)
+# Calculate the total distance traveled
+total_distance = calculate_total_distance(montreal_graph, all_paths)
+print("Total Distance Traveled (kilometers):", total_distance)
 
-# # Calculate the cost of the operation
-# prix = cost_drone(total_distance)
-# print("Price of this operation (in euros):", prix)
+# Calculate the cost of the operation
+prix = cost_drone(total_distance)
+print("Price of this operation (in euros):", prix)
 
 # Compute the execution_time and prints it
 end_time = time.time()

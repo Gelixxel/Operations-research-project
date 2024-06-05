@@ -8,6 +8,27 @@ import networkx as nx
 import osmnx as ox
 from geopy.distance import geodesic
 
+from package.cout import cost_drone
+
+# fonction de calcul de la distance totale a changer
+def calculate_total_distance(G, eulerian_circuit):
+    total_distance = 0
+
+    for U, V in eulerian_circuit:
+        # Get (lat, lon) of U and V
+        U_coords = G.nodes[U]['y'], G.nodes[U]['x']
+        V_coords = G.nodes[V]['y'], G.nodes[V]['x']
+
+        # Get Geodesic distance between each point
+        edge_distance = geodesic(U_coords, V_coords).kilometers
+
+        # Add the distance
+        total_distance += edge_distance
+
+    return total_distance
+
+start_time = time.time()
+
 if platform.system() != "Darwin":
     matplotlib.use('TkAgg')
 
@@ -59,6 +80,21 @@ for i in range(len(central_nodes)):
         print(f"Shortest path between {source} and {target} is {shortest_path}")
     else:
         print(f"No path between {source} and {target}.")
+
+# # Calculate the total distance traveled
+# total_distance = calculate_total_distance(montreal_graph, all_paths)
+# print("Total Distance Traveled (kilometers):", total_distance)
+
+# # Calculate the cost of the operation
+# prix = cost_drone(total_distance)
+# print("Price of this operation (in euros):", prix)
+
+# Compute the execution_time and prints it
+end_time = time.time()
+execution_time = end_time - start_time
+hours, remain = divmod(execution_time, 3600)
+minutes, seconds = divmod(remain, 60)
+print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):02}secs")
 
 # Plot the Montreal map with all shortest paths
 print("Plotting the Montreal map with the shortest path between each pair of nodes in red...")

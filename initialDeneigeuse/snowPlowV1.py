@@ -31,6 +31,8 @@ combined_graph = nx.MultiDiGraph()
 color_map = {}
 color_index = 0  # Initialize color index to keep track of color assignments
 
+A = 0
+
 # Function to divide the graph into subgraphs based on range
 def subGraph(G, range):
     nodes = list(G.nodes)
@@ -112,7 +114,7 @@ for sector in sectors:
     G = ox.graph_from_place(sector, network_type='drive', simplify=True, retain_all=True)
     
     # Divide the graph into subgraphs
-    sub_graphs = subGraph(G, 5000)  # Adjust range as needed
+    sub_graphs = subGraph(G, 600)  # Adjust range as needed
     
     for sub_nodes in sub_graphs:
         sub_G = G.subgraph(sub_nodes).copy()
@@ -123,7 +125,8 @@ for sector in sectors:
             color_map[node] = current_color
         
         color_index += 1  # Move to the next color
-        
+        print(A)
+        A += 1
         # Combine the subgraph into the combined graph
         combined_graph = nx.compose(combined_graph, sub_G)
 

@@ -16,7 +16,6 @@ def create_subgraph(graph, selected_nodes):
     return subgraph
 
 def subGraph(G, range_limit):
-
     nodes = list(G.nodes)
     
     colors = [
@@ -29,82 +28,52 @@ def subGraph(G, range_limit):
         "lightcoral", "darkorchid", "indianred", "mediumseagreen", "lightpink", "peru"
     ]
 
-    def isNotEnd(verif):
-        return any(v == 0 for v in verif)
-
-    def parcours_graph(graph, start_node, weight_limit, verif):
+    def parcours_graph(graph, start_node, weight_limit, visited):
         accessible_nodes = set()
-        accessible_nodes.add(start_node)
-        verif[nodes.index(start_node)] = 1
+        stack = [(start_node, 0)]
+        visited.add(start_node)
 
-        def dfs(node, current_weight):
+        while stack:
+            node, current_weight = stack.pop()
+            accessible_nodes.add(node)
             for neighbor in graph.neighbors(node):
-                weight = graph.edges[(node, neighbor, 0)]['length']
+                weight = graph.edges[node, neighbor, 0]['length']
                 new_weight = current_weight + weight
-        
-                if new_weight <= weight_limit and verif[nodes.index(neighbor)] == 0:
-                    accessible_nodes.add(neighbor)
-                    dfs(neighbor, new_weight)
-        dfs(start_node, 0)
+                if new_weight <= weight_limit and neighbor not in visited:
+                    visited.add(neighbor)
+                    stack.append((neighbor, new_weight))
+
         return accessible_nodes
 
-    node_color = ['black'] * len(nodes)
-    verif = [0] * len(nodes)
+    visited = set()
+    sub_graphs = []
 
-    def findNode(verif):
-        for i, v in enumerate(verif):
-            if v == 0:
-                return i
-        return -1
+    for node in nodes:
+        if node not in visited:
+            sub_graph = parcours_graph(G, node, range_limit, visited)
+            sub_graphs.append(sub_graph)
 
-    def subDiv():
-        res = []
-        while isNotEnd(verif):
-            i = findNode(verif)
-            verif[i] = 1
-            actualNode = nodes[i]
-            acc = parcours_graph(G, actualNode, range_limit, verif)
-            for n in acc:
-                verif[nodes.index(n)] = 1
-            res.append(acc)
-        return res
-
-    sub_graphs = subDiv()
-
+    # Remove small subgraphs
     limit = range_limit // 100
-    to_little_graph = [graph for graph in sub_graphs if len(graph) < limit]
-    for graph in to_little_graph:
-        sub_graphs.remove(graph)
+    sub_graphs = [graph for graph in sub_graphs if len(graph) >= limit]
 
-    def findSubGraph(G, graph):
-        node = list(graph)[0]
-        verif = []
-        def dfs(G, graph, node, verif):
-            verif.append(node)
-            for neighbor in G.neighbors(node):
-                if neighbor not in verif:
-                    if neighbor not in graph:
-                        return neighbor
-                    return dfs(G, graph, neighbor, verif)
-        return dfs(G, graph, node, verif)
+    # Combine small subgraphs with larger ones
+    to_little_graphs = [graph for graph in sub_graphs if len(graph) < limit]
+    sub_graphs = [graph for graph in sub_graphs if len(graph) >= limit]
 
-    tmp = len(to_little_graph)
-    it = 0
-    while it < tmp:
-        graph = to_little_graph.pop(0)
-        biggerGraphMember = findSubGraph(G, graph)
-        if biggerGraphMember is None:
-            to_little_graph.append(graph)
-            it += 1
-            continue
-        for g in sub_graphs:
-            if biggerGraphMember in g:
-                g.update(graph)
+    while to_little_graphs:
+        small_graph = to_little_graphs.pop(0)
+        merged = False
+        for larger_graph in sub_graphs:
+            if any(node in larger_graph for node in small_graph):
+                larger_graph.update(small_graph)
+                merged = True
                 break
-        it += 1
+        if not merged:
+            sub_graphs.append(small_graph)
 
-    sub_graphs += to_little_graph
-
+    # Assign colors to nodes
+    node_color = ['black'] * len(nodes)
     col = 0
     for graph in sub_graphs:
         for n in graph:
@@ -114,7 +83,6 @@ def subGraph(G, range_limit):
     pos = {n: (G.nodes[n]['x'], G.nodes[n]['y']) for n in G.nodes()}
     plt.figure(figsize=(12, 12))
     nx.draw(G, pos, node_size=40, node_color=node_color, edge_color='gray', with_labels=False)
-    #plt.title(f"Subgraphs for {name}")
     plt.show()
     return sub_graphs
 
@@ -125,11 +93,9 @@ sectors = [
     "Rivière-des-Prairies-Pointe-aux-Trembles, Montreal, Quebec, Canada",
     "Le Plateau-Mont-Royal, Montreal, Quebec, Canada"
 ]
-"""""
-#for sector in sectors:
-sector = "Outremont, Montreal, Quebec, Canada"
-print(f"Processing {sector}...")
-# 1000 = 7 color on outremont
-subgraphs = subGraph(G, 500)
-print(f"Completed {sector}.")
-"""
+
+# for sector in sectors:
+#     print(f"Processing {sector}...")
+#     G = ox.graph_from_place(sector, network_type='drive')
+#     subgraphs = subGraph(G, 10000)
+#     print(f"Completed {sector}.")

@@ -12,7 +12,7 @@ if platform.system() != "Darwin":
 # print(platform.system())
 
 # first sector
-sector1 = "Outremont, Montreal, Quebec, Canada"
+sector1 = "Rivière-des-Prairies-Pointe-aux-Trembles, Montreal, Quebec, Canada"
 
 # Initialize an empty graph
 combined_graph = nx.MultiDiGraph()
@@ -54,4 +54,4 @@ fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_col
 # plt.savefig("montreal_combined_graph.png")
 plt.show(block=True)
 
-subGraph(combined_graph, 500)
+subGraph(combined_graph, 5000)

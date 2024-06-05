@@ -94,8 +94,8 @@ sectors = [
     "Le Plateau-Mont-Royal, Montreal, Quebec, Canada"
 ]
 
-# for sector in sectors:
-#     print(f"Processing {sector}...")
-#     G = ox.graph_from_place(sector, network_type='drive')
-#     subgraphs = subGraph(G, 10000)
-#     print(f"Completed {sector}.")
+for sector in sectors:
+    print(f"Processing {sector}...")
+    G = ox.graph_from_place(sector, network_type='drive')
+    subgraphs = subGraph(G, 10000)
+    print(f"Completed {sector}.")

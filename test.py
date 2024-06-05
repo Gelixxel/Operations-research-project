@@ -5,6 +5,9 @@ import osmnx as ox
 import platform
 from package.cout import cost_drone, cost_sp1, cost_sp2
 from package.algorithms import costOptimisation
+import time
+
+start_time = time.time()
 
 if platform.system() != "Darwin":
     matplotlib.use('TkAgg')
@@ -28,4 +31,4 @@ for sector in sectors:
     G = ox.graph_from_place(sector, network_type='drive', simplify=True, retain_all=True)
     combined_graph = nx.compose(combined_graph, G)
 
-costOptimisation(combined_graph)
+costOptimisation(combined_graph, start_time)

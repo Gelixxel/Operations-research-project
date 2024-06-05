@@ -5,7 +5,7 @@ return the total cost of the drone's operation
 """
 
 def cost_drone(distance):
-    speed = 60                      # Speed of the drone
+    speed = 36                      # Speed of the drone
     hours = distance / speed        # Number of hours of the drone to browse the distance
     cost = 0.0                      # Initialise the cost
     cost += 0.01 * distance         # Cost per kilometer

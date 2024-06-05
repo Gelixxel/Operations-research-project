@@ -16,16 +16,16 @@ if platform.system() != "Darwin":
 # Define the sectors
 sectors = [
     "Rivière-des-Prairies–Pointe-aux-Trembles, Montreal, Quebec, Canada",
-    "Anjou, Montreal, Quebec, Canada",
     "Montréal-Nord, Montreal, Quebec, Canada",
     "Saint-Léonard, Montreal, Quebec, Canada",
+    "Anjou, Montreal, Quebec, Canada",
     "Mercier–Hochelaga-Maisonneuve, Montreal, Quebec, Canada",
     "Rosemont–La Petite-Patrie, Montreal, Quebec, Canada",
     "Villeray–Saint-Michel–Parc-Extension, Montreal, Quebec, Canada",
     "Ahuntsic-Cartierville, Montreal, Quebec, Canada",
     "Le Plateau-Mont-Royal, Montreal, Quebec, Canada",
-    "Outremont, Montreal, Quebec, Canada",
     "Ville-Marie, Montreal, Quebec, Canada",
+    "Outremont, Montreal, Quebec, Canada",
     "Côte-des-Neiges–Notre-Dame-de-Grâce, Montreal, Quebec, Canada",
     "Le Sud-Ouest, Montreal, Quebec, Canada",
     "Verdun, Montreal, Quebec, Canada",
@@ -51,7 +51,7 @@ start_time = time.time()
 
 # Download the entire Montreal street network
 print("Downloading the street network for Montreal...")
-montreal_graph = ox.graph_from_place("Montreal, Quebec, Canada", network_type='drive', simplify=True)
+montreal_graph = ox.graph_from_place("Montreal, Quebec, Canada", network_type='drive')
 print("Downloaded the street network for Montreal.")
 
 montreal_graph = montreal_graph.to_undirected()

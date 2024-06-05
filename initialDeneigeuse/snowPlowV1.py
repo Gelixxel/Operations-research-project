@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
 import platform
-from initialDeneigeuse.subGraph import subGraph
+from package.subGraph import subGraph
 
 # Set the backend explicitly to TkAgg for better compatibility
 if platform.system() != "Darwin":

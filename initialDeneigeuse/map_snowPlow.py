@@ -4,6 +4,7 @@ import networkx as nx
 import osmnx as ox
 from package.algorithms import parkourGraphDrone, printInfos
 import platform
+from snowplowV2 import subGraph
 
 # Set the backend explicitly to TkAgg for better compatibility
 if platform.system() != "Darwin":
@@ -36,7 +37,6 @@ for node, data in nodes_data:
             if (node == v):
                 edges_to_remove.append((u, v, k))
 
-print(edges_to_remove)
 # Remove edges that are dead-ends
 combined_graph.remove_edges_from(edges_to_remove)
 
@@ -53,3 +53,5 @@ printInfos(combined_graph)
 fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_color='w', edge_linewidth=0.5)
 # plt.savefig("montreal_combined_graph.png")
 plt.show(block=True)
+
+subGraph(combined_graph, 500)

@@ -15,10 +15,10 @@ def create_subgraph(graph, selected_nodes):
 
     return subgraph
 
-def subGraph(name, range_limit):
-    G = ox.graph_from_place(name, network_type='drive')
-    nodes = list(G.nodes)
+def subGraph(G, range_limit):
 
+    nodes = list(G.nodes)
+    
     colors = [
         "blue", "green", "red", "yellow", "magenta", "orange", "purple",
         "pink", "brown", "gray", "olive", "teal", "lime", "maroon",
@@ -114,7 +114,7 @@ def subGraph(name, range_limit):
     pos = {n: (G.nodes[n]['x'], G.nodes[n]['y']) for n in G.nodes()}
     plt.figure(figsize=(12, 12))
     nx.draw(G, pos, node_size=40, node_color=node_color, edge_color='gray', with_labels=False)
-    plt.title(f"Subgraphs for {name}")
+    #plt.title(f"Subgraphs for {name}")
     plt.show()
     return sub_graphs
 
@@ -125,9 +125,11 @@ sectors = [
     "Rivière-des-Prairies-Pointe-aux-Trembles, Montreal, Quebec, Canada",
     "Le Plateau-Mont-Royal, Montreal, Quebec, Canada"
 ]
-
-for sector in sectors:
-    print(f"Processing {sector}...")
-    # 1000 = 7 color on outremont
-    subgraphs = subGraph(sector, 500)
-    print(f"Completed {sector}.")
+"""""
+#for sector in sectors:
+sector = "Outremont, Montreal, Quebec, Canada"
+print(f"Processing {sector}...")
+# 1000 = 7 color on outremont
+subgraphs = subGraph(G, 500)
+print(f"Completed {sector}.")
+"""

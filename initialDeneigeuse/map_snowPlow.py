@@ -4,7 +4,7 @@ import networkx as nx
 import osmnx as ox
 from package.algorithms import parkourGraphDrone, printInfos
 import platform
-from snowplowV2 import subGraph
+from initialDeneigeuse.subGraph import subGraph
 
 # Set the backend explicitly to TkAgg for better compatibility
 if platform.system() != "Darwin":

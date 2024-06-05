@@ -2,19 +2,6 @@ import osmnx as ox
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def create_subgraph(graph, selected_nodes):
-    subgraph = nx.DiGraph()
-    subgraph.add_nodes_from(selected_nodes)
-
-    for node in selected_nodes:
-        edges = graph.edges(node, data=True)
-        for edge in edges:
-            target_node = edge[1]
-            if target_node in selected_nodes:
-                subgraph.add_edge(node, target_node, **edge[2])
-
-    return subgraph
-
 def subGraph(G, range_limit):
     nodes = list(G.nodes)
     
@@ -86,16 +73,16 @@ def subGraph(G, range_limit):
     plt.show()
     return sub_graphs
 
-sectors = [
-    "Outremont, Montreal, Quebec, Canada",
-    "Verdun, Montreal, Quebec, Canada",
-    "Anjou, Montreal, Quebec, Canada",
-    "Rivière-des-Prairies-Pointe-aux-Trembles, Montreal, Quebec, Canada",
-    "Le Plateau-Mont-Royal, Montreal, Quebec, Canada"
-]
+# sectors = [
+#     "Outremont, Montreal, Quebec, Canada",
+#     "Verdun, Montreal, Quebec, Canada",
+#     "Anjou, Montreal, Quebec, Canada",
+#     "Rivière-des-Prairies-Pointe-aux-Trembles, Montreal, Quebec, Canada",
+#     "Le Plateau-Mont-Royal, Montreal, Quebec, Canada"
+# ]
 
-for sector in sectors:
-    print(f"Processing {sector}...")
-    G = ox.graph_from_place(sector, network_type='drive')
-    subgraphs = subGraph(G, 10000)
-    print(f"Completed {sector}.")
+# for sector in sectors:
+#     print(f"Processing {sector}...")
+#     G = ox.graph_from_place(sector, network_type='drive')
+#     subgraphs = subGraph(G, 10000)
+#     print(f"Completed {sector}.")

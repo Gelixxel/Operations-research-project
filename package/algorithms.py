@@ -29,15 +29,40 @@ def printInfos(G):
         print(u, v, data)
 
 def recOptimisation(total_distance_km, L, L2):
-    return L, L2
+    # Base case: if the total distance is zero, return the current lists and zero cost
+    if total_distance_km <= 0:
+        return L, L2, 0
+    
+    # Initialize minimum cost to a very large value
+    min_cost = float('inf')
+    best_L = None
+    best_L2 = None
+    
+    # Check all possible distances that SP1 can cover from 0 to total_distance_km
+    for distance_sp1 in range(0, int(total_distance_km) + 1):
+        distance_sp2 = total_distance_km - distance_sp1
+        
+        # Calculate the cost for the current split
+        cost_sp1_current = cost_sp1(distance_sp1)
+        cost_sp2_current = cost_sp2(distance_sp2)
+        
+        # Total cost for this combination
+        total_cost = cost_sp1_current + cost_sp2_current
+        
+        # If this is the lowest cost so far, update the best solution
+        if total_cost < min_cost:
+            min_cost = total_cost
+            best_L = L + [distance_sp1]
+            best_L2 = L2 + [distance_sp2]
+    
+    return best_L, best_L2, min_cost
 
 def costOptimisation(combined_graph):
     total_distance_km = parkourGraphDrone(combined_graph)
     print(f"Total distance of the graph: {total_distance_km:.2f} km")
-    L, L2 = recOptimisation(total_distance_km, [], [])
+    L, L2, total_cost = recOptimisation(total_distance_km, [], [])
     print(f"List of snowplow type 1: {L}")
     print(f"List of snowplow type 2: {L2}")
-    total_cost = 0
     print(f"Total cost of the graph traversal: {total_cost:.2f} €")
 
     # printInfos(combined_graph)

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import osmnx as ox
 from package.cout import cost_drone, cost_sp1, cost_sp2
+import time
 
 def parkourGraphDrone(G):
     # Initialize the total distance
@@ -57,13 +58,25 @@ def recOptimisation(total_distance_km, L, L2):
     
     return best_L, best_L2, min_cost
 
-def costOptimisation(combined_graph):
+def costOptimisation(combined_graph, start_time):
     total_distance_km = parkourGraphDrone(combined_graph)
     print(f"Total distance of the graph: {total_distance_km:.2f} km")
+
     L, L2, total_cost = recOptimisation(total_distance_km, [], [])
     print(f"List of snowplow type 1: {L}")
     print(f"List of snowplow type 2: {L2}")
     print(f"Total cost of the graph traversal: {total_cost:.2f} €")
+    
+    total_time = (L2[0] / 20) * 3600
+    h, r = divmod(total_time, 3600)
+    min, s = divmod(r, 60)
+    print(f"Total duration of the graph traversal: {int(h):02}hrs {int(min):02}mins {int(s):02}secs")
+
+    end_time = time.time()
+    execution_time = end_time - start_time
+    hours, remain = divmod(execution_time, 3600)
+    minutes, seconds = divmod(remain, 60)
+    print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):02}secs")
 
     # printInfos(combined_graph)
     ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_color='w', edge_linewidth=0.5)

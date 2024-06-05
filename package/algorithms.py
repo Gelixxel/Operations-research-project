@@ -78,7 +78,14 @@ def min_cost_to_clear_distance(total_distance_km, max_hours):
                 if total_cost < min_cost:
                     min_cost = total_cost
                     best_combination = (num_sp1, num_sp2)
-
+    
+    if min_cost == float('inf'):
+        if (distance_sp1_8h >= total_distance_km):
+            min_cost = cost_sp1_8h
+            best_combination = (1, 0)
+        else:
+            min_cost = cost_sp2_8h
+            best_combination = (0, 1)
     return best_combination, min_cost
 
 def costOptimisation(combined_graph, start_time):

@@ -71,6 +71,7 @@ def find_route_containing(routes, node):
 
 for sector in sectors:
     try:
+        print(f"Processing {sector}...")
         # Retrieve and simplify each sector's graph
         G = ox.graph_from_place(sector, network_type='drive')
         
@@ -85,6 +86,8 @@ for sector in sectors:
         
         # Store routes for later plotting
         all_sector_routes.append((G, position, routes))
+        
+        print(f"Completed {sector}.\n")
 
     except Exception as e:
         print(f"Failed to process {sector}: {e}")
@@ -98,16 +101,29 @@ print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):0
 
 # Visualization on a single plot
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-
+nb = 0
 for G, position, routes in all_sector_routes:
     # Draw each graph on the same subplot
     nx.draw(G, pos=position, ax=ax, node_size=10, node_color='black', edge_color='gray', alpha=0.2)
-    colors = ["blue", "green", "red", "yellow", "magenta", "orange", "purple"]
+    colors = [
+        "blue", "green", "red", "yellow", "magenta", "orange", "purple",
+        "pink", "brown", "gray", "olive", "teal", "lime", "maroon",
+        "gold", "orchid", "seagreen", "salmon", "darkorange", "silver",
+        "darkgoldenrod", "darkslategray", "mediumorchid", "darkturquoise",
+        "sandybrown", "darkkhaki", "plum", "limegreen", "chocolate",
+        "palevioletred", "rosybrown", "lightcoral", "darkorchid", "indianred",
+        "mediumseagreen", "lightpink", "peru"
+    ]
     for i, route in enumerate(routes):
+        if (len(route) == 1):
+            continue
         color = colors[i % len(colors)]
+        nb += 1
         route_edges = [(route[n], route[n + 1]) for n in range(len(route) - 1)]
         nx.draw_networkx_edges(G, pos=position, edgelist=route_edges, edge_color=color, width=1, ax=ax)
         nx.draw_networkx_nodes(G, pos=position, nodelist=route, node_color=color, node_size=20, ax=ax)
+
+print(f"Nb colors : {nb}")
 
 plt.tight_layout()
 plt.show()

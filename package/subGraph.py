@@ -67,12 +67,32 @@ def subGraph(G, range_limit):
             node_color[nodes.index(n)] = colors[col % len(colors)]
         col += 1
 
+    # Find remaining black nodes and color them with the nearest colored node's color using edge length
+    black_nodes = [i for i, color in enumerate(node_color) if color == 'black']
+    colored_nodes = [i for i, color in enumerate(node_color) if color != 'black']
+
+    for black_node in black_nodes:
+        black_node_id = nodes[black_node]
+        shortest_paths = nx.single_source_dijkstra_path_length(G, black_node_id, weight='length')
+        nearest_colored_node = None
+        min_distance = float('inf')
+
+        for colored_node in colored_nodes:
+            colored_node_id = nodes[colored_node]
+            if colored_node_id in shortest_paths and shortest_paths[colored_node_id] < min_distance:
+                min_distance = shortest_paths[colored_node_id]
+                nearest_colored_node = colored_node
+
+        if nearest_colored_node is not None:
+            node_color[black_node] = node_color[nearest_colored_node]
+
     pos = {n: (G.nodes[n]['x'], G.nodes[n]['y']) for n in G.nodes()}
     plt.figure(figsize=(12, 12))
     nx.draw(G, pos, node_size=40, node_color=node_color, edge_color='gray', with_labels=False)
     plt.show()
     return sub_graphs
 
+# Example usage:
 # sectors = [
 #     "Outremont, Montreal, Quebec, Canada",
 #     "Verdun, Montreal, Quebec, Canada",

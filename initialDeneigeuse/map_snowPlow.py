@@ -54,4 +54,4 @@ fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_col
 # plt.savefig("montreal_combined_graph.png")
 plt.show(block=True)
 
-subGraph(combined_graph, 10000)
+subGraph(combined_graph, 7000)

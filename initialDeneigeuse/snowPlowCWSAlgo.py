@@ -20,6 +20,8 @@ vehicle_capacity = 300
 # List to hold all sector routes
 all_sector_routes = []
 
+combined_graph = nx.MultiDiGraph()
+
 # Function definitions for Clarke-Wright algorithm
 def clarke_wright_savings(distances, vehicle_capacity):
     # Initialize routes with each node as a separate route
@@ -83,6 +85,9 @@ for sector in sectors:
 
         # Apply Clarke-Wright algorithm to this sector's graph
         routes = clarke_wright_savings(distances, vehicle_capacity)
+
+        # Combine the subgraph into the combined graph
+        combined_graph = nx.compose(combined_graph, G)
         
         # Store routes for later plotting
         all_sector_routes.append((G, position, routes))
@@ -100,24 +105,23 @@ minutes, seconds = divmod(remain, 60)
 print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):02}secs")
 
 # Visualization on a single plot
-fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+fig, ax = plt.subplots(1, 1, figsize=(6, 10))
 nb = 0
 for G, position, routes in all_sector_routes:
     # Draw each graph on the same subplot
     nx.draw(G, pos=position, ax=ax, node_size=10, node_color='black', edge_color='gray', alpha=0.2)
     colors = [
-        "blue", "green", "red", "yellow", "magenta", "orange", "purple",
-        "pink", "brown", "gray", "olive", "teal", "lime", "maroon",
-        "gold", "orchid", "seagreen", "salmon", "darkorange", "silver",
-        "darkgoldenrod", "darkslategray", "mediumorchid", "darkturquoise",
-        "sandybrown", "darkkhaki", "plum", "limegreen", "chocolate",
-        "palevioletred", "rosybrown", "lightcoral", "darkorchid", "indianred",
-        "mediumseagreen", "lightpink", "peru"
+        "green", "teal", "orangered", "slateblue", "deeppink",
+        "aquamarine", "royalblue", "gold", "darkviolet", "pink", "yellowgreen",
+        "springgreen", "steelblue", "darkorange", "indigo", "crimson",
+        "chartreuse", "lightseagreen", "red", "navy", "magenta",
+        "turquoise", "lavender", "yellow", "darkmagenta", "lightpink"
+        "seagreen", "deepskyblue", "chocolate", "rebeccapurple", "hotpink",
     ]
     for i, route in enumerate(routes):
         if (len(route) == 1):
             continue
-        color = colors[i % len(colors)]
+        color = colors[nb % len(colors)]
         nb += 1
         route_edges = [(route[n], route[n + 1]) for n in range(len(route) - 1)]
         nx.draw_networkx_edges(G, pos=position, edgelist=route_edges, edge_color=color, width=1, ax=ax)

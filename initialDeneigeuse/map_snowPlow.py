@@ -23,7 +23,7 @@ G = ox.graph_from_place(sector1, network_type='drive', simplify=True, retain_all
 combined_graph = nx.compose(combined_graph, G)
 
 # Convert the graph to a directed graph
-#combined_graph = combined_graph.to_directed()
+# combined_graph = combined_graph.to_directed()
 
 # Filter dead-end streets
 edges_to_remove = []
@@ -50,8 +50,11 @@ print(f"Total distance of the graph: {total_distance_km:.2f} km")
 
 printInfos(combined_graph)
 
-fig, ax = ox.plot_graph(combined_graph, node_size=10, node_color='red', edge_color='w', edge_linewidth=0.5)
-# plt.savefig("montreal_combined_graph.png")
-plt.show(block=True)
+# Plot the graph using nx.draw
+fig, ax = plt.subplots(figsize=(12, 12))
+pos = {node: (data['x'], data['y']) for node, data in combined_graph.nodes(data=True)}
+nx.draw(combined_graph, pos, node_size=10, node_color='red', edge_color='gray', width=0.5)
+plt.show()
 
+# Call subGraph to visualize subgraphs
 subGraph(combined_graph, 7000)

@@ -111,12 +111,12 @@ for G, position, routes in all_sector_routes:
     # Draw each graph on the same subplot
     nx.draw(G, pos=position, ax=ax, node_size=10, node_color='black', edge_color='gray', alpha=0.2)
     colors = [
-        "green", "teal", "orangered", "slateblue", "deeppink",
+        "green", "teal", "orangered", "slateblue", "lightseagreen", "deeppink",
         "aquamarine", "royalblue", "gold", "darkviolet", "pink", "yellowgreen",
         "springgreen", "steelblue", "darkorange", "indigo", "crimson",
-        "chartreuse", "lightseagreen", "red", "navy", "magenta",
+        "chartreuse", "red", "navy", "magenta", "hotpink",
         "turquoise", "lavender", "yellow", "darkmagenta", "lightpink"
-        "seagreen", "deepskyblue", "chocolate", "rebeccapurple", "hotpink",
+        "seagreen", "deepskyblue", "chocolate", "rebeccapurple",
     ]
     for i, route in enumerate(routes):
         if (len(route) == 1):

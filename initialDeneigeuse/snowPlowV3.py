@@ -6,6 +6,13 @@ import platform
 from collections import deque
 from map_snowPlow import map_sector
 
+def choose_optimal_sources(G, num_sources=1):
+    degree_centrality = nx.degree_centrality(G)
+    sorted_nodes = sorted(degree_centrality, key=degree_centrality.get, reverse=True)
+    sources = sorted_nodes[:num_sources]
+    
+    return sources
+
 def bfs_multisource_colored(G, sources, color_map):
     visited = set()
     edge_colors = {}
@@ -25,19 +32,12 @@ def bfs_multisource_colored(G, sources, color_map):
                     edge_colors[(parent, node, key)] = color_map[sources.index(source)]
     
     return edge_colors
-""""
-def draw_graph_with_colored_edges(G, pos, edge_colors):
-    pos = {n: (G.nodes[n]['x'], G.nodes[n]['y']) for n in G.nodes()}
-    plt.figure(figsize=(12, 12))
-    for edge, color in edge_colors.items():
-        u, v, key = edge
-        nx.draw(G, pos, node_size=40, node_color="black", edge_color=color, with_labels=False)
-    plt.show()
-"""
+
+
 def draw_graph_with_colored_edges(G, pos, edge_colors):
     plt.figure(figsize=(12, 12))
     # Draw nodes and labels
-    nx.draw(G, pos, with_labels=True, node_size=40, node_color="black", font_size=8, font_color='black', connectionstyle='arc3,rad=0.1', arrows=True, arrowstyle='-|>', arrowsize=20)
+    nx.draw(G, pos, with_labels=False, node_size=40, node_color="black", font_size=8, font_color='black', connectionstyle='arc3,rad=0.1', arrows=True, arrowstyle='-|>', arrowsize=20)
     
     # Get the edge list and corresponding colors
     edges = list(edge_colors.keys())
@@ -45,16 +45,8 @@ def draw_graph_with_colored_edges(G, pos, edge_colors):
     
     # Draw edges with colors
     nx.draw_networkx_edges(G, pos, edgelist=edges, edge_color=colors, connectionstyle='arc3,rad=0.1', arrows=True, arrowstyle='-|>', arrowsize=20)
-    """""
-    # Draw nodes and labels
-    nx.draw_networkx_nodes(G, pos, node_size=50, node_color='skyblue')
     
-    # Draw edges with specified colors
-    for edge, color in edge_colors.items():
-        u, v, key = edge
-        nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], edge_color=color, style='solid',
-                               connectionstyle='arc3,rad=0.1', arrows=True, arrowstyle='-|>', arrowsize=20)
-    """
+    # Draw nodes and la
     plt.title('Graph Traversal with Colored Edges')
     plt.show()
 
@@ -68,7 +60,7 @@ print("First 5 nodes:")
 for node, data in list(nodes_data)[:5]:
     print(node, data)
         
-sources = [29239079, 31700055, 29795236]
+sources = choose_optimal_sources(G1, 3)
 
 
 color_map = [

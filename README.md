@@ -2,6 +2,5 @@
 
 Epita's Lyon17 group ERO1 repository
 
-On va déneiger Montréal come jaja
-
-run pip3 install -e . to install package and dependencies
+You can start the project by executing start.sh.
+Give it the executions permissions if needed.

@@ -88,6 +88,15 @@ def min_cost_to_clear_distance(total_distance_km, max_hours):
             best_combination = (0, 1)
     return best_combination, min_cost
 
+def total_cost_distance_calc(L):
+    total_cost = 0
+    for item in L:
+        if (item == L[len(L)]):
+            total_cost += cost_sp1(item)
+        else:
+            total_cost += cost_sp2(item)
+    return total_cost
+
 def costOptimisation(combined_graph, start_time):
     total_distance_km = parkourGraphDrone(combined_graph)
     print(f"Total distance of the graph: {total_distance_km:.2f} km")

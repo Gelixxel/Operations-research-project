@@ -3,6 +3,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import time
 
+from package.algorithms import parkourGraphDrone
+from package.cout import cost_sp1, cost_sp2
+
 start_time = time.time()
 
 # Define the sectors
@@ -13,6 +16,8 @@ sectors = [
     "Rivière-des-prairies-pointe-aux-trembles, Montreal, Canada",
     "Le Plateau-Mont-Royal, Montreal, Canada"
 ]
+
+max_sp1 = 2
 
 # Assume vehicle capacity
 vehicle_capacity = 300
@@ -71,6 +76,9 @@ def find_route_containing(routes, node):
             return route_key
     return None
 
+total_distance = 0
+total_cost = 0
+
 for sector in sectors:
     try:
         print(f"Processing {sector}...")
@@ -91,7 +99,24 @@ for sector in sectors:
         
         # Store routes for later plotting
         all_sector_routes.append((G, position, routes))
-        
+
+        sector_distance = parkourGraphDrone(G)
+        snowplow_count = 0
+        for _, route in enumerate(routes):
+            if (len(route) == 1):
+                continue
+            snowplow_count += 1
+        if sector_distance < 80:
+            sector_cost = cost_sp1(sector_distance)
+        elif (sector_distance % 160) <= 80 & max_sp1 > 0:
+            sector_cost = cost_sp2((sector_distance - (sector_distance % 160)) / (snowplow_count - 1)) * (snowplow_count - 1) + cost_sp1(sector_distance % 160)
+            max_sp1 -= 1
+        else:
+            sector_cost = cost_sp2(sector_distance / snowplow_count) * snowplow_count
+        total_distance += sector_distance
+        total_cost += sector_cost
+        print(f"Sector distance {sector_distance} km")
+        print(f"Total cost of the operation in this sector {sector_cost} €")
         print(f"Completed {sector}.\n")
 
     except Exception as e:
@@ -102,6 +127,8 @@ end_time = time.time()
 execution_time = end_time - start_time
 hours, remain = divmod(execution_time, 3600)
 minutes, seconds = divmod(remain, 60)
+print(f"Total distance {total_distance} km")
+print(f"Total cost of the operation {total_cost} €")
 print(f"Execution Time: {int(hours):02}hrs {int(minutes):02}mins {int(seconds):02}secs")
 
 # Visualization on a single plot
@@ -118,7 +145,7 @@ for G, position, routes in all_sector_routes:
         "turquoise", "lavender", "yellow", "darkmagenta", "lightpink"
         "seagreen", "deepskyblue", "chocolate", "rebeccapurple",
     ]
-    for i, route in enumerate(routes):
+    for _, route in enumerate(routes):
         if (len(route) == 1):
             continue
         color = colors[nb % len(colors)]

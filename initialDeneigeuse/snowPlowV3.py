@@ -4,6 +4,16 @@ import osmnx as ox
 from collections import deque
 from map_snowPlow import map_sector
 
+def get_edge_lengths(G):
+    edge_lengths = {}
+    for u, v, key, data in G.edges(keys=True, data=True):
+        edge_length = data.get('length', None)
+        edge_lengths[(u, v, key)] = edge_length
+    return edge_lengths
+
+def find_edge_length_by_key(edge_lengths, u, v, edge_key):
+    return edge_lengths.get((u, v, edge_key))
+
 def choose_optimal_sources(G, num_sources=1):
     degree_centrality = nx.degree_centrality(G)
     sorted_nodes = sorted(degree_centrality, key=degree_centrality.get, reverse=True)
@@ -11,6 +21,7 @@ def choose_optimal_sources(G, num_sources=1):
     return sources
 
 def bfs_multisource_colored(G, sources, color_map):
+    edge_lengths = get_edge_lengths(G)
     visited_edges = set()
     edge_colors = {}
     queue = deque([(source, None, source, None) for source in sources])  # (current_node, parent_node, source, edge_key)
@@ -20,13 +31,15 @@ def bfs_multisource_colored(G, sources, color_map):
         
         for neighbor in G.neighbors(node):
             for edge_key in G[node][neighbor]:
+                edge_length = find_edge_length_by_key(edge_lengths, node, neighbor, edge_key)
                 edge = (node, neighbor, edge_key)
                 if edge not in visited_edges:
                     visited_edges.add(edge)
                     queue.append((neighbor, node, source, edge_key))
-                    edge_colors[edge] = color_map[sources.index(source)]
+                    edge_colors[edge] = (color_map[sources.index(source)], edge_length)
                     
     return edge_colors
+
 
 def draw_graph_with_colored_edges(G, pos, edge_colors):
     plt.figure(figsize=(12, 12))
@@ -36,7 +49,7 @@ def draw_graph_with_colored_edges(G, pos, edge_colors):
     
     # Get the edge list and corresponding colors
     edges = list(edge_colors.keys())
-    colors = [edge_colors[edge] for edge in edges]
+    colors = [edge_colors[edge][0] for edge in edges]
     
     # Draw edges with colors
     nx.draw_networkx_edges(G, pos, edgelist=edges, edge_color=colors, arrows=False)
@@ -63,6 +76,12 @@ color_map = [
     "mediumseagreen", "lightpink", "peru", "green",
 ]
 
+def find_color(arg, tuple_list):
+    for i in range(len(tuple_list)):
+        if arg == tuple_list[i][0]:
+            return i
+    return -1
+
 combined_graph = nx.MultiDiGraph()
 for sector in sectors:
     G = map_sector(sector)
@@ -70,7 +89,22 @@ for sector in sectors:
     sources = choose_optimal_sources(G, 3)
     
     edge_colors = bfs_multisource_colored(G, sources, color_map)
+        
+    snowplot_distances = []
+        
+    for value in edge_colors.values():
+        color, length = value
+        i = find_color(color, snowplot_distances) 
+        if i != -1:
+            d = snowplot_distances[i][1] + (length if length else 0)
+            del snowplot_distances[i]
+            snowplot_distances.append((color, d))
+        else:
+            snowplot_distances.append((color, length if length else 0))
     
+    for (color, length) in snowplot_distances:
+        print(f"{color}: {length}")
+        
     pos = {node: (data['x'], data['y']) for node, data in nodes_data if 'x' in data and 'y' in data}
     # Check for nodes without positions
     for node in G.nodes():

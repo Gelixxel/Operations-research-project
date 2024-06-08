@@ -97,6 +97,7 @@ print("Plotting the Montreal map with the shortest path between each pair of nod
 fig, ax = ox.plot_graph(montreal_graph, node_size=10, edge_color='gray', show=False, close=False)
 
 # Plot all paths in red
+# fig1 = plt.gcf()
 ox.plot_graph_routes(montreal_graph, routes=all_paths, route_linewidth=1, route_color='red', ax=ax, orig_dest_node_size=0)
-
 plt.show()
+# fig1.savefig("droneV2.pdf", format='pdf')

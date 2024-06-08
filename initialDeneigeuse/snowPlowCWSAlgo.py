@@ -155,6 +155,6 @@ for G, position, routes in all_sector_routes:
         nx.draw_networkx_nodes(G, pos=position, nodelist=route, node_color=color, node_size=20, ax=ax)
 
 print(f"Nb colors : {nb}")
-
 plt.tight_layout()
 plt.show()
+# fig.savefig("snowPlowV2.pdf", dpi=300, format='pdf')

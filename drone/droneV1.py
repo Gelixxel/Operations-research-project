@@ -85,7 +85,7 @@ def Drone_Travel(G):
 
     # Plot the graph with the trajectories
     fig, ax = ox.plot_graph(G, show=False, close=False)
-    plt.savefig("droneV1.pdf")
+    # fig.savefig("droneV1.pdf", format='pdf')
     ox.plot_graph_route(G, node_ids, route_linewidth=2, route_color='r', ax=ax)
 
     return prix, total_distance, node_ids

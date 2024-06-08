@@ -65,5 +65,7 @@ colors = [color_map.get(node, 'black') for node in combined_graph.nodes()]
 
 print(f"Total colors : {A}")
 # Plot the graph with the specified node colors
+# fig1 = plt.gcf()
 fig, ax = ox.plot_graph(combined_graph, node_size=20, node_color=colors, edge_linewidth=0.5)
 plt.show()
+# fig.savefig("snowPlowV1.pdf", format='pdf')

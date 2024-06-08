@@ -56,6 +56,7 @@ def draw_graph_with_colored_edges(G, pos, edge_colors):
     nx.draw_networkx_edges(G, pos, edgelist=edges, edge_color=colors, arrows=False)
     
     plt.title('Graph Traversal with Colored Edges')
+    # plt.savefig('snowPlowV3.pdf', format='pdf')
     plt.show()
 
 # Define sectors and color map

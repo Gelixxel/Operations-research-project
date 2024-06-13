@@ -37,7 +37,7 @@ The script allows you to choose various solutions for drone and snow plow simula
 Navigate to the project directory and execute:
 
 ```bash
-./script.sh
+./start.sh
 ```
 
 ### Drone Solutions

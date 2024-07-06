@@ -1,9 +1,9 @@
-# ERO1-Lyon17
+# Operations research project
 
 Epita's Lyon17 group ERO1 repository
 
 ## Overview
-ERO1-Lyon17 is a sophisticated project aimed at optimizing snow removal operations in Montreal, which currently total $165 million annually. Utilizing drones and snowplows, the project leverages advanced algorithms to propose a cost-effective and efficient plan for the city.
+ERO1 (Élément de Recheche Opérationnelle n°1 in French) is a sophisticated project aimed at optimizing snow removal operations in Montreal, which currently total $165 million annually. Utilizing drones and snowplows, the project leverages advanced algorithms to propose a cost-effective and efficient plan for the city.
 
 ## Installation
 Clone the repository and install the required Python packages using pip:
